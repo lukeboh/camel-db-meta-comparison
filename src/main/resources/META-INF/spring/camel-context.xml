@@ -1,30 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Configures the Camel Context-->
-
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="
-       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
-
-  <camelContext xmlns="http://camel.apache.org/schema/spring">
-    <!-- here is a sample which processes the input files
-         (leaving them in place - see the 'noop' flag)
-         then performs content based routing on the message using XPath -->
-    <route>
-      <from uri="file:src/data?noop=true"/>
-      <choice>
-        <when>
-          <xpath>/person/city = 'London'</xpath>
-          <log message="UK message"/>
-          <to uri="file:target/messages/uk"/>
-        </when>
-        <otherwise>
-          <log message="Other message"/>
-          <to uri="file:target/messages/others"/>
-        </otherwise>
-      </choice>
-    </route>
-  </camelContext>
-
+    xmlns:camel="http://camel.apache.org/schema/spring"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd     http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+    <bean
+        class="org.apache.camel.component.properties.PropertiesComponent"
+        id="properties" scope="singleton">
+        <property name="location" value="config.properties"/>
+    </bean>
+    <bean class="br.jus.tse.corporativa.io.FileUtils" id="fileUtils" scope="singleton"/>
+    <bean class="oracle.jdbc.pool.OracleDataSource"
+        destroy-method="close" id="dataSource">
+        <property name="URL" value="${procucao.URL}"/>
+        <property name="user" value="${producao.user}"/>
+        <property name="password" value="${producao.password}"/>
+        <property name="connectionCachingEnabled" value="true"/>
+    </bean>
+    <camel:camelContext id="camel-db-meta-comparison-context" xmlns="http://camel.apache.org/schema/spring">
+        <propertyPlaceholder id="myPropertyPlaceholder" location="file:config.properties"/>
+        <route autoStartup="false" id="query-2-csv">
+            <from id="_from-query" uri="timer://timerQuery?period=30m"/>
+            <setBody id="_setBodyQuery">
+                <constant>
+          select dt.owner schema, dt.TABLE_NAME tabela, tc.COMMENTS comentario from SYS.DBA_TABLES dt 
+  			left join SYS.DBA_TAB_COMMENTS tc on tc.TABLE_NAME = dt.TABLE_NAME and tc.OWNER = dt.OWNER
+ 			where dt.owner = 'ADMCAD'
+ 			order by dt.table_name
+        </constant>
+            </setBody>
+            <to id="_toDataSource" uri="jdbc:dataSource"/>
+            <marshal id="_marshalRStoCSV">
+                <csv/>
+            </marshal>
+            <setHeader headerName="CamelFileName" id="_setHeaderCSVFileName">
+                <constant>output.csv</constant>
+            </setHeader>
+            <to id="_toCSVFile" uri="file:target/work"/>
+        </route>
+        <camel:route id="prepare-git">
+            <camel:from id="_fromTimerPrepareGit" uri="timer:timerName?repeatCount=1"/>
+            <camel:choice id="_choiceGitLocal">
+                <camel:when id="_whenExisteGitLocal">
+                    <camel:method
+                        method="fileExists('target/work/git-repo-temp')" ref="fileUtils"/>
+                    <camel:log id="_logGitClone" message="Repositorio Local existente: será feito git clone"/>
+                    <camel:to id="_toGitClone" uri="git:target/work/git-repo-temp?remoteName=origin&amp;remotePath={{git.remotePath}}&amp;operation=pull"/>
+                </camel:when>
+                <camel:otherwise id="_otherwiseExisteGitLocal">
+                    <camel:log id="_logGitPull" message="Repositorio Local existente: será feito git pull"/>
+                    <camel:to id="_toGitPull" uri="git:target/work/git-repo-temp?remoteName=origin&amp;remotePath={{git.remotePath}}&amp;operation=clone"/>
+                </camel:otherwise>
+            </camel:choice>
+        </camel:route>
+    </camel:camelContext>
 </beans>
