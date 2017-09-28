@@ -36,7 +36,7 @@
             <log id="_log2" message="Arquivo CSV gerado"/>
         </route>
         <camel:route id="prepare-git">
-            <camel:from id="_fromTimerPrepareGit" uri="timer:timerName?repeatCount=1"/>
+            <camel:from id="_fromTimerPrepareGit" uri="timer:timerGit?repeatCount=1"/>
             <camel:choice id="_choiceGitLocal">
                 <camel:when id="_whenExisteGitLocal">
                     <camel:method
