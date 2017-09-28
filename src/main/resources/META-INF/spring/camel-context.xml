@@ -41,13 +41,13 @@
                 <camel:when id="_whenExisteGitLocal">
                     <camel:method
                         method="fileExists('target/work/git-repo-temp')" ref="fileUtils"/>
-                    <camel:log id="_logGitClone" message="Repositorio Local existente: será feito git pull"/>
-                    <camel:to id="_toGitClone" uri="git:target/work/git-repo-temp?remoteName=origin&amp;remotePath={{git.remotePath}}&amp;operation=pull"/>
+                    <camel:log id="_logGitPull" message="Repositorio Local existente: será feito git pull"/>
+                    <camel:to id="_toGitPull" uri="git:target/work/git-repo-temp?remoteName=origin&amp;remotePath={{git.remotePath}}&amp;operation=pull"/>
                     <camel:log id="_log3" message="Repositorio Git Atualizado"/>
                 </camel:when>
                 <camel:otherwise id="_otherwiseExisteGitLocal">
-                    <camel:log id="_logGitPull" message="Repositorio Local inexistente: será feito git clone"/>
-                    <camel:to id="_toGitPull" uri="git:target/work/git-repo-temp?remoteName=origin&amp;remotePath={{git.remotePath}}&amp;operation=clone"/>
+                    <camel:log id="_logGitClone" message="Repositorio Local inexistente: será feito git clone"/>
+                    <camel:to id="_toGitClone" uri="git:target/work/git-repo-temp?remoteName=origin&amp;remotePath={{git.remotePath}}&amp;operation=clone"/>
                     <camel:log id="_log4" message="Repositorio Git Clonado"/>
                 </camel:otherwise>
             </camel:choice>
