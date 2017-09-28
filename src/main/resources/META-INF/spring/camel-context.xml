@@ -1,23 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:camel="http://camel.apache.org/schema/spring"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd     http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
-    <bean
-        class="org.apache.camel.component.properties.PropertiesComponent"
-        id="properties" scope="singleton">
-        <property name="location" value="config.properties"/>
-    </bean>
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd     http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
     <bean class="br.jus.tse.corporativa.io.FileUtils" id="fileUtils" scope="singleton"/>
     <bean class="oracle.jdbc.pool.OracleDataSource"
         destroy-method="close" id="dataSource">
-        <property name="URL" value="${procucao.URL}"/>
+        <property name="URL" value="${producao.URL}"/>
         <property name="user" value="${producao.user}"/>
         <property name="password" value="${producao.password}"/>
         <property name="connectionCachingEnabled" value="true"/>
     </bean>
+    <context:property-placeholder location="file:config.properties"/>
     <camel:camelContext id="camel-db-meta-comparison-context" xmlns="http://camel.apache.org/schema/spring">
         <propertyPlaceholder id="myPropertyPlaceholder" location="file:config.properties"/>
-        <route autoStartup="false" id="query-2-csv">
+        <route id="query-2-csv">
             <from id="_from-query" uri="timer://timerQuery?period=30m"/>
             <setBody id="_setBodyQuery">
                 <constant>
@@ -27,6 +24,7 @@
  			order by dt.table_name
         </constant>
             </setBody>
+            <log id="_log1" message="Acessando o banco de dados"/>
             <to id="_toDataSource" uri="jdbc:dataSource"/>
             <marshal id="_marshalRStoCSV">
                 <csv/>
@@ -35,6 +33,7 @@
                 <constant>output.csv</constant>
             </setHeader>
             <to id="_toCSVFile" uri="file:target/work"/>
+            <log id="_log2" message="Arquivo CSV gerado"/>
         </route>
         <camel:route id="prepare-git">
             <camel:from id="_fromTimerPrepareGit" uri="timer:timerName?repeatCount=1"/>
@@ -42,12 +41,14 @@
                 <camel:when id="_whenExisteGitLocal">
                     <camel:method
                         method="fileExists('target/work/git-repo-temp')" ref="fileUtils"/>
-                    <camel:log id="_logGitClone" message="Repositorio Local existente: será feito git clone"/>
+                    <camel:log id="_logGitClone" message="Repositorio Local existente: será feito git pull"/>
                     <camel:to id="_toGitClone" uri="git:target/work/git-repo-temp?remoteName=origin&amp;remotePath={{git.remotePath}}&amp;operation=pull"/>
+                    <camel:log id="_log3" message="Repositorio Git Atualizado"/>
                 </camel:when>
                 <camel:otherwise id="_otherwiseExisteGitLocal">
-                    <camel:log id="_logGitPull" message="Repositorio Local existente: será feito git pull"/>
+                    <camel:log id="_logGitPull" message="Repositorio Local inexistente: será feito git clone"/>
                     <camel:to id="_toGitPull" uri="git:target/work/git-repo-temp?remoteName=origin&amp;remotePath={{git.remotePath}}&amp;operation=clone"/>
+                    <camel:log id="_log4" message="Repositorio Git Clonado"/>
                 </camel:otherwise>
             </camel:choice>
         </camel:route>
