@@ -14,7 +14,7 @@
     <context:property-placeholder location="file:config.properties"/>
     <camel:camelContext id="camel-db-meta-comparison-context" xmlns="http://camel.apache.org/schema/spring">
         <propertyPlaceholder id="myPropertyPlaceholder" location="file:config.properties"/>
-        <route autoStartup="false" id="query-2-csv">
+        <route id="query-2-csv">
             <from id="_from-query" uri="timer://timerQuery?period=30m"/>
             <setBody id="_setBodyQuery">
                 <constant>
@@ -34,15 +34,16 @@
             </setHeader>
             <to id="_toCSVFile" uri="file:target/work"/>
             <log id="_log2" message="Arquivo CSV gerado"/>
+            <to id="_to1" uri="direct:prepare-git"/>
         </route>
-        <camel:route id="prepare-git" autoStartup="true">
-            <camel:from id="_fromTimerPrepareGit" uri="timer:timerGit?repeatCount=1"/>
+        <camel:route autoStartup="true" id="prepare-git">
+            <camel:from id="_fromInitPrepareGit" uri="direct:prepare-git"/>
             <camel:choice id="_choiceGitLocal">
                 <camel:when id="_whenExisteGitLocal">
                     <camel:method
                         method="fileExists('target/work/git-repo-temp')" ref="fileUtils"/>
                     <camel:log id="_logGitPull" message="Repositorio Local existente: será feito git pull"/>
-                    <camel:to id="_toGitPull" uri="exec:git?args=pull&amp;workingDir=target/work/git-repo-temp"/>
+                    <camel:to id="_toGitPull" uri="exec:git?args=pull --all&amp;workingDir=target/work/git-repo-temp"/>
                     <camel:log id="_log3" message="Repositorio Git Atualizado"/>
                 </camel:when>
                 <camel:otherwise id="_otherwiseExisteGitLocal">
@@ -51,6 +52,13 @@
                     <camel:log id="_log4" message="Repositorio Git Clonado"/>
                 </camel:otherwise>
             </camel:choice>
+            <setHeader headerName="working-branch" id="_setHeaderWorkingBranch">
+                <constant>producao</constant>
+            </setHeader>
+            <camel:log id="_log5" message="Checkout da branch $simple{in.header.working-branch}"/>
+            <camel:recipientList id="_recipientListExec Git Checkout (URI DINAMICO)">
+                <camel:simple>exec:git?args=checkout ${in.header.working-branch} &amp;workingDir=target/work/git-repo-temp</camel:simple>
+            </camel:recipientList>
         </camel:route>
     </camel:camelContext>
 </beans>
