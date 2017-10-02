@@ -30,9 +30,9 @@
                 <csv/>
             </marshal>
             <setHeader headerName="CamelFileName" id="_setHeaderCSVFileName">
-                <constant>output.csv</constant>
+                <constant>db-metadata.csv</constant>
             </setHeader>
-            <to id="_toCSVFile" uri="file:target/work"/>
+            <to id="_toCSVFile" uri="file:target/work/git-repo-temp"/>
             <log id="_log2" message="Arquivo CSV gerado"/>
             <to id="_to1" uri="direct:x"/>
         </route>
