@@ -69,9 +69,42 @@
             <camel:log id="_log6" message="*** Fim Git ***"/>
         </camel:route>
         <camel:route id="_routeStartTime">
+            <!-- PRODUCAO -->
+            <!-- SIMULADO -->
+            <!-- 
+            <camel:setHeader headerName="working-branch" id="_setHeader3">
+                <constant>simulado</constant>
+            </camel:setHeader>
+            <camel:to id="_toSimulado" uri="direct:fake"/>
+             -->
+            <!-- HOMOLOGACAO -->
+            <!-- 
+            <camel:setHeader headerName="working-branch" id="_setHeader4">
+                <constant>homologacao</constant>
+            </camel:setHeader>
+            <camel:to id="_toHomologacao" uri="direct:fake"/>
+             -->
+            <!-- DESENVOLVIMENTO -->
+            <!-- 
+            <camel:setHeader headerName="working-branch" id="_setHeader5">
+                <constant>desenvolvimento</constant>
+            </camel:setHeader>
+            <camel:to id="_toDesenvolvimento" uri="direct:fake"/>
+             -->
             <camel:from id="_from0" uri="timer://timerStart?period=30m"/>
-            <camel:to id="_to0" uri="direct:prepare-git"/>
+            <camel:setHeader headerName="working-branch" id="_setHeader1">
+                <constant>producao</constant>
+            </camel:setHeader>
+            <camel:setHeader headerName="working-datasource" id="_setHeader2">
+                <camel:simple>ref:dataSource</camel:simple>
+            </camel:setHeader>
+            <camel:to id="_toProducao" uri="direct:fake"/>
             <camel:log id="_log7" message="********* FIM *********"/>
+        </camel:route>
+        <camel:route id="_routeFake">
+            <from id="_from2" uri="direct:fake"/>
+            <log id="_log8" message="Branch: $simple{in.header.working-branch}"/>
+            <log id="_log8" message="Branch: $simple{in.header.working-datasource}"/>
         </camel:route>
     </camel:camelContext>
 </beans>
