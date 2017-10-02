@@ -5,7 +5,7 @@
   <groupId>br.jus.tse.corporativa</groupId>
   <artifactId>camel-db-meta-comparison</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <name>A Camel Spring Route</name>
+  <name>Rota Camel para comparar modelos de versões de bancos de dados</name>
   <properties>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <camel.osgi.export.pkg>org.apache.camel.example.jdbc.*</camel.osgi.export.pkg>
