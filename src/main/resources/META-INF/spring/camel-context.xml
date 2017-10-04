@@ -5,38 +5,74 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd     http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
     <bean class="br.jus.tse.corporativa.io.FileUtils" id="fileUtils" scope="singleton"/>
     <bean class="oracle.jdbc.pool.OracleDataSource"
-        destroy-method="close" id="dataSource">
+        destroy-method="close" id="producao.dataSource">
         <property name="URL" value="${producao.URL}"/>
         <property name="user" value="${producao.user}"/>
         <property name="password" value="${producao.password}"/>
         <property name="connectionCachingEnabled" value="true"/>
     </bean>
+    <bean class="oracle.jdbc.pool.OracleDataSource"
+        destroy-method="close" id="simulado.dataSource">
+        <property name="URL" value="${simulado.URL}"/>
+        <property name="user" value="${simulado.user}"/>
+        <property name="password" value="${simulado.password}"/>
+        <property name="connectionCachingEnabled" value="true"/>
+    </bean>
+    <bean class="oracle.jdbc.pool.OracleDataSource"
+        destroy-method="close" id="homologacao.dataSource">
+        <property name="URL" value="${homologacao.URL}"/>
+        <property name="user" value="${homologacao.user}"/>
+        <property name="password" value="${homologacao.password}"/>
+        <property name="connectionCachingEnabled" value="true"/>
+    </bean>
+    <bean class="oracle.jdbc.pool.OracleDataSource"
+        destroy-method="close" id="desenvolvimento.dataSource">
+        <property name="URL" value="${desenvolvimento.URL}"/>
+        <property name="user" value="${desenvolvimento.user}"/>
+        <property name="password" value="${desenvolvimento.password}"/>
+        <property name="connectionCachingEnabled" value="true"/>
+    </bean>
     <context:property-placeholder location="file:config.properties"/>
     <camel:camelContext id="camel-db-meta-comparison-context" xmlns="http://camel.apache.org/schema/spring">
         <propertyPlaceholder id="myPropertyPlaceholder" location="file:config.properties"/>
-        <route id="query-2-csv">
-            <from id="_from-query" uri="direct:query-2-csv"/>
-            <setBody id="_setBodyQuery">
-                <constant>
-          select dt.owner schema, dt.TABLE_NAME tabela, tc.COMMENTS comentario from SYS.DBA_TABLES dt 
-  			left join SYS.DBA_TAB_COMMENTS tc on tc.TABLE_NAME = dt.TABLE_NAME and tc.OWNER = dt.OWNER
- 			where dt.owner = 'ADMCAD'
- 			order by dt.table_name
-        </constant>
-            </setBody>
-            <log id="_log1" message="Acessando o banco de dados"/>
-            <to id="_toDataSource" uri="jdbc:dataSource"/>
-            <marshal id="_marshalRStoCSV">
-                <csv/>
-            </marshal>
-            <setHeader headerName="CamelFileName" id="_setHeaderCSVFileName">
-                <constant>db-metadata.csv</constant>
-            </setHeader>
-            <to id="_toCSVFile" uri="file:target/work/git-repo-temp"/>
-            <log id="_log2" message="Arquivo CSV gerado"/>
-            <to id="_to1" uri="direct:perform-git"/>
-        </route>
-        <camel:route autoStartup="true" id="prepare-git">
+        <camel:route id="_routeMain">
+            <camel:from id="_from0" uri="timer://timerMain?period=30m"/>
+            <camel:to id="_toPrepare-git" uri="direct:prepare-git"/>
+            <!-- PRODUCAO -->
+            <camel:setHeader headerName="working-branch" id="_setHeader1">
+                <constant>producao</constant>
+            </camel:setHeader>
+            <camel:setHeader headerName="working-datasource" id="_setHeader2">
+                <camel:simple>ref:producao.dataSource</camel:simple>
+            </camel:setHeader>
+            <camel:to id="_toProducao" uri="direct:perBranch"/>
+            <!-- SIMULADO -->
+            <camel:setHeader headerName="working-branch" id="_setHeader3">
+                <constant>simulado</constant>
+            </camel:setHeader>
+            <camel:setHeader headerName="working-datasource" id="_setHeader2">
+                <camel:simple>ref:simulado.dataSource</camel:simple>
+            </camel:setHeader>
+            <camel:to id="_toSimulado" uri="direct:perBranch"/>
+            <!-- HOMOLOGACAO -->
+            <camel:setHeader headerName="working-branch" id="_setHeader4">
+                <constant>homologacao</constant>
+            </camel:setHeader>
+            <camel:setHeader headerName="working-datasource" id="_setHeader2">
+                <camel:simple>ref:homologacao.dataSource</camel:simple>
+            </camel:setHeader>
+            <camel:to id="_toHomologacao" uri="direct:perBranch"/>
+            <!-- DESENVOLVIMENTO -->
+            <camel:setHeader headerName="working-branch" id="_setHeader5">
+                <constant>desenvolvimento</constant>
+            </camel:setHeader>
+            <camel:setHeader headerName="working-datasource" id="_setHeader2">
+                <camel:simple>ref:desenvolvimento.dataSource</camel:simple>
+            </camel:setHeader>
+            <camel:to id="_toDesenvolvimento" uri="direct:perBranch"/>
+            <camel:log id="_log7" message="********* FIM *********"/>
+        </camel:route>
+        <camel:route id="prepare-git">
             <camel:from id="_fromStartPrepareGit" uri="direct:prepare-git"/>
             <camel:to id="_toMkdirWork" uri="exec:mkdir?args=target/work -p"/>
             <camel:choice id="_choiceGitLocal">
@@ -53,58 +89,52 @@
                     <camel:log id="_log4" message="Repositorio Git Clonado"/>
                 </camel:otherwise>
             </camel:choice>
-            <setHeader headerName="working-branch" id="_setHeaderWorkingBranch">
-                <constant>producao</constant>
-            </setHeader>
-            <camel:log id="_log5" message="Checkout da branch $simple{in.header.working-branch}"/>
+        </camel:route>
+        <camel:route id="_routePerBranch">
+            <from id="_from2" uri="direct:perBranch"/>
+            <log id="_log8" message="[$simple{in.header.working-branch}] Datasource: $simple{in.header.working-datasource}"/>
+            <camel:to id="_toPrepare-branch-git" uri="direct:prepare-branch-git"/>
+            <camel:to id="_toPrepare-branch-git" uri="direct:query-2-csv"/>
+            <camel:to id="_to1" uri="direct:perform-git"/>
+        </camel:route>
+        <camel:route id="prepare-branch-git">
+            <camel:from id="_fromStartPrepareGit" uri="direct:prepare-branch-git"/>
+            <camel:log id="_log5" message="[$simple{in.header.working-branch}] Checkout da branch"/>
             <camel:recipientList id="_recipientListExec Git Checkout (URI DINAMICO)">
                 <camel:simple>exec:git?args=checkout ${in.header.working-branch} &amp;workingDir=target/work/git-repo-temp</camel:simple>
             </camel:recipientList>
             <camel:to id="_to2" uri="direct:query-2-csv"/>
         </camel:route>
+        <camel:route id="query-2-csv">
+            <camel:from id="_from-query" uri="direct:query-2-csv"/>
+            <camel:setBody id="_setBodyQuery">
+                <camel:constant>
+          select dt.owner schema, dt.TABLE_NAME tabela, tc.COMMENTS comentario from SYS.DBA_TABLES dt 
+  			left join SYS.DBA_TAB_COMMENTS tc on tc.TABLE_NAME = dt.TABLE_NAME and tc.OWNER = dt.OWNER
+ 			where dt.owner = 'ADMCAD'
+ 			order by dt.table_name
+        </camel:constant>
+            </camel:setBody>
+            <camel:log id="_log1" message="[$simple{in.header.working-branch}] Acessando o banco de dados"/>
+            
+            <camel:recipientList id="_recipientListJdbc JDBC (URI DINAMICO)">
+                <camel:simple>jdbc:${in.header.working-branch}.dataSource</camel:simple>
+            </camel:recipientList>
+            
+            <camel:marshal id="_marshalRStoCSV">
+                <camel:csv/>
+            </camel:marshal>
+            <camel:setHeader headerName="CamelFileName" id="_setHeaderCSVFileName">
+                <camel:constant>db-metadata.csv</camel:constant>
+            </camel:setHeader>
+            <camel:to id="_toCSVFile" uri="file:target/work/git-repo-temp"/>
+            <camel:log id="_log2" message="[$simple{in.header.working-branch}] Arquivo CSV gerado"/>
+        </camel:route>
         <camel:route id="perform-git">
             <camel:from id="_from1" uri="direct:perform-git"/>
-            <camel:to id="_toGitCommit" uri="exec:git?args=commit -a -m '[AUTOMATICO] Alterações detectadas'&amp;workingDir=target/work/git-repo-temp"/>
+            <camel:to id="_toGitCommit" uri='exec:git?args=commit -a -m "[AUTOMATICO] Alterações detectadas" &amp;workingDir=target/work/git-repo-temp'/>
             <camel:to id="_toGitPush" uri="exec:git?args=push &amp;workingDir=target/work/git-repo-temp"/>
-            <camel:log id="_log6" message="*** Fim Git ***"/>
-        </camel:route>
-        <camel:route id="_routeStartTime">
-            <!-- PRODUCAO -->
-            <!-- SIMULADO -->
-            <!-- 
-            <camel:setHeader headerName="working-branch" id="_setHeader3">
-                <constant>simulado</constant>
-            </camel:setHeader>
-            <camel:to id="_toSimulado" uri="direct:fake"/>
-             -->
-            <!-- HOMOLOGACAO -->
-            <!-- 
-            <camel:setHeader headerName="working-branch" id="_setHeader4">
-                <constant>homologacao</constant>
-            </camel:setHeader>
-            <camel:to id="_toHomologacao" uri="direct:fake"/>
-             -->
-            <!-- DESENVOLVIMENTO -->
-            <!-- 
-            <camel:setHeader headerName="working-branch" id="_setHeader5">
-                <constant>desenvolvimento</constant>
-            </camel:setHeader>
-            <camel:to id="_toDesenvolvimento" uri="direct:fake"/>
-             -->
-            <camel:from id="_from0" uri="timer://timerStart?period=30m"/>
-            <camel:setHeader headerName="working-branch" id="_setHeader1">
-                <constant>producao</constant>
-            </camel:setHeader>
-            <camel:setHeader headerName="working-datasource" id="_setHeader2">
-                <camel:simple>ref:dataSource</camel:simple>
-            </camel:setHeader>
-            <camel:to id="_toProducao" uri="direct:fake"/>
-            <camel:log id="_log7" message="********* FIM *********"/>
-        </camel:route>
-        <camel:route id="_routeFake">
-            <from id="_from2" uri="direct:fake"/>
-            <log id="_log8" message="Branch: $simple{in.header.working-branch}"/>
-            <log id="_log8" message="Branch: $simple{in.header.working-datasource}"/>
+            <camel:log id="_log6" message="[$simple{in.header.working-branch}] Git Commited and Pushed"/>
         </camel:route>
     </camel:camelContext>
 </beans>

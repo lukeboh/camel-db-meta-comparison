@@ -1,0 +1,15 @@
+producao.URL=jdbc\:oracle\:thin\:@cad-bd-producao.tse.jus.br\:1521\:CAD
+producao.user=_USER_
+producao.password=_PASSWD_
+simulado.URL=jdbc\:oracle\:thin\:@//cad-bd-homologacao.tse.jus.br\:1521/simulado.tse
+simulado.user=_USER_
+simulado.password=_PASSWD_
+homologacao.URL=jdbc\:oracle\:thin\:@cad-bd-homologacao.tse.jus.br\:1521/tsehmg
+homologacao.user=_USER_
+homologacao.password=_PASSWD_
+desenvolvimento.URL=jdbc\:oracle\:thin\:@cad-bd-desenvolvimento.tse.jus.br\:1521\:tsedsv
+desenvolvimento.user=_USER_
+desenvolvimento.password=_PASSWD_
+#TEM QUE INFORMAR REPOSITORIO GIT COM USUARIO E SENHA
+git.remotePath=_URL_GIT_
+
