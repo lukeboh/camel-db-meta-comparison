@@ -110,7 +110,7 @@
             
             <camel:setBody id="_setBodyQuery">
                 <camel:constant>
-			select dt.owner schema, 'TABLE' type, dt.owner father, dt.TABLE_NAME object, ' ' as complement, tc.COMMENTS  
+			select dt.owner schema, 'TABLE' type, dt.owner owner, dt.TABLE_NAME object, ' ' as complement, tc.COMMENTS  
 			  from SYS.DBA_TABLES dt 
 			  left join SYS.DBA_TAB_COMMENTS tc on tc.TABLE_NAME = dt.TABLE_NAME and tc.OWNER = dt.OWNER
 			 where dt.owner = 'ADMCAD'
@@ -122,7 +122,14 @@
                 <camel:simple>jdbc:${in.header.working-branch}.dataSource</camel:simple>
             </camel:recipientList>
             <camel:marshal id="_marshalRStoCSV">
-                <camel:csv/>
+                <camel:csv>
+                	<camel:header>SCHEMA</camel:header>
+                	<camel:header>TYPE</camel:header>
+                	<camel:header>OWNER</camel:header>
+                	<camel:header>OBJECT</camel:header>
+                	<camel:header>COMPLEMENT</camel:header>
+                	<camel:header>COMMENTS</camel:header>
+                </camel:csv>
             </camel:marshal>
             <camel:setHeader headerName="CamelFileName" id="_setHeaderCSVFileName">
                 <camel:constant>table-metadata.csv</camel:constant>
@@ -132,7 +139,7 @@
                         
             <camel:setBody id="_setBodyQuery">
                 <camel:constant>
-			select dtc.OWNER schema, 'COLUMN' type, dtc.table_name father, dtc.column_name object, 
+			select dtc.OWNER schema, 'COLUMN' type, dtc.table_name owner, dtc.column_name object, 
 			       dtc.nullable || ' ' || 
 			       dtc.data_type || case when dtc.data_type = 'NUMBER' and dtc.data_precision is not null then '(' || dtc.data_precision || ',' || dtc.data_scale || ')'
 			                            when dtc.data_type like '%CHAR%' then '(' || dtc.data_length || ')'
@@ -152,7 +159,14 @@
                 <camel:simple>jdbc:${in.header.working-branch}.dataSource</camel:simple>
             </camel:recipientList>
             <camel:marshal id="_marshalRStoCSV">
-                <camel:csv/>
+                <camel:csv>
+                	<camel:header>SCHEMA</camel:header>
+                	<camel:header>TYPE</camel:header>
+                	<camel:header>OWNER</camel:header>
+                	<camel:header>OBJECT</camel:header>
+                	<camel:header>COMPLEMENT</camel:header>
+                	<camel:header>COMMENTS</camel:header>
+                </camel:csv>
             </camel:marshal>
             <camel:setHeader headerName="CamelFileName" id="_setHeaderCSVFileName">
                 <camel:constant>column-metadata.csv</camel:constant>
