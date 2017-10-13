@@ -35,7 +35,7 @@
     <context:property-placeholder location="file:config.properties"/>
     <camel:camelContext id="camel-db-meta-comparison-context" xmlns="http://camel.apache.org/schema/spring">
         <propertyPlaceholder id="myPropertyPlaceholder" location="file:config.properties"/>
-        <camel:route id="_routeMain">
+        <camel:route id="_routeMain" autoStartup="true">
             <camel:from id="_from0" uri="timer://timerMain?period=30m"/>
             <camel:to id="_toPrepare-git" uri="direct:prepare-git"/>
             <!-- PRODUCAO -->
@@ -96,6 +96,7 @@
             <camel:to id="_toPrepare-branch-git" uri="direct:prepare-branch-git"/>
             <camel:to id="_toPrepare-branch-git" uri="direct:query-2-csv"/>
             <camel:to id="_to1" uri="direct:perform-git"/>
+            <camel:to uri="direct:get-last-commit-time"/>
         </camel:route>
         <camel:route id="prepare-branch-git">
             <camel:from id="_fromStartPrepareGit" uri="direct:prepare-branch-git"/>
@@ -173,7 +174,6 @@
             </camel:setHeader>
             <camel:to id="_toCSVFile" uri="file:target/work/git-repo-temp"/>
             <camel:log id="_log2" message="[$simple{in.header.working-branch}] Arquivo [$simple{in.header.CamelFileName}] gerado"/>
-            
         </camel:route>
         <camel:route id="perform-git">
             <camel:from id="_from1" uri="direct:perform-git"/>
@@ -183,6 +183,40 @@
             	<camel:simple>exec:git?args=push --set-upstream origin ${in.header.working-branch} &amp;workingDir=target/work/git-repo-temp</camel:simple>
             </camel:recipientList>
             <camel:log id="_log6" message="[$simple{in.header.working-branch}] Git Commited and Pushed"/>
+        </camel:route>
+        <camel:route id="_get-last-commit-time">
+            <from uri="direct:get-last-commit-time"/>
+            <camel:setHeader headerName="CamelExecCommandArgs">
+                <camel:simple>log -1 --format=%cd --date=relative ${in.header.working-branch}</camel:simple>
+            </camel:setHeader>
+            <camel:to uri="exec:git?workingDir=target/work/git-repo-temp"/>
+            <camel:log message="[${in.header.working-branch}] Última Alteração (Relativa): ${body}"/>
+            <camel:setHeader headerName="$simple{in.header.working-branch}.last-commit-relative">
+                <camel:simple>${body}</camel:simple>
+            </camel:setHeader>
+            <!-- camel:setHeader headerName="CamelFileName">
+                <camel:simple>${in.header.working-branch}.last-commit-relative".txt</camel:simple>
+            </camel:setHeader>
+            <camel:to uri="file:target/work"/-->
+            <camel:setHeader headerName="CamelExecCommandArgs">
+                <camel:simple>log -1 --format=%cd --date=format:%d/%m/%Y ${in.header.working-branch}</camel:simple>
+            </camel:setHeader>
+            <camel:to uri="exec:git?workingDir=target/work/git-repo-temp"/>
+            <camel:log message="[${in.header.working-branch}] Última Alteração (Data): ${body}"/>
+            <camel:setHeader headerName="$simple{in.header.working-branch}.last-commit">
+                <camel:simple>${body}</camel:simple>
+            </camel:setHeader>
+        </camel:route>
+        <camel:route id="_routeTest" autoStartup="false">
+            <camel:from uri="timer://timerMain?period=30m"/>
+            <camel:setHeader headerName="working-branch">
+                <constant>producao</constant>
+            </camel:setHeader>
+            <camel:to uri="direct:get-last-commit-time"/>
+            <camel:setHeader headerName="working-branch">
+                <constant>simulado</constant>
+            </camel:setHeader>
+            <camel:to uri="direct:get-last-commit-time"/>
         </camel:route>
     </camel:camelContext>
 </beans>
