@@ -35,7 +35,7 @@
     <context:property-placeholder location="file:config.properties"/>
     <camel:camelContext id="camel-db-meta-comparison-context" xmlns="http://camel.apache.org/schema/spring">
         <propertyPlaceholder id="myPropertyPlaceholder" location="file:config.properties"/>
-        <camel:route id="_routeMain" autoStartup="true">
+        <camel:route id="_routeMain" autoStartup="false">
             <camel:from id="_from0" uri="timer://timerMain?period=30m"/>
             <camel:to id="_toPrepare-git" uri="direct:prepare-git"/>
             <!-- PRODUCAO -->
@@ -229,7 +229,7 @@
         <camel:route id="_get-diffs">
         	<camel:from uri="direct:get-diffs"/>
         	<camel:setHeader headerName="CamelExecCommandArgs">
-                <camel:simple>diff --numstat homologacao:table-metadata.csv desenvolvimento:table-metadata.csv</camel:simple>
+                <camel:simple>diff --numstat ${in.header.branch-ini}:${in.header.file-prefix}-metadata.csv ${in.header.branch-fin}:${in.header.file-prefix}-metadata.csv</camel:simple>
             </camel:setHeader>
             <camel:setHeader headerName="CamelExecCommandWorkingDir">
                 <camel:simple>target/work/git-repo-temp</camel:simple>
@@ -237,14 +237,27 @@
             <camel:to uri="exec:git"/>
             <convertBodyTo type="java.lang.String"/>
             <camel:log message="Diff: ${body}"/>
-            <camel:setHeader headerName="table-metadata.homologacao.desenvolvimento">
+            <camel:setHeader headerName="$simple{in.header.file-prefix}-metadata.$simple{in.header.branch-ini}.$simple{in.header.branch-fin}">
                 <camel:simple>${body}</camel:simple>
             </camel:setHeader>
+             <camel:setHeader headerName="CamelFileName">
+                <camel:simple>${in.header.file-prefix}-metadata.${in.header.branch-ini}.${in.header.branch-fin}.txt</camel:simple>
+            </camel:setHeader>
+            <camel:to uri="file:target/work"/>
             <to uri="log:debug?showHeaders=true&amp;multiline=true"/>
         </camel:route>
         
-        <camel:route id="_routeTest" autoStartup="false">
+        <camel:route id="_routeTest" autoStartup="true">
             <camel:from uri="timer://timerMain?period=30m"/>
+             <camel:setHeader headerName="branch-ini">
+                <camel:simple>homologacao</camel:simple>
+            </camel:setHeader>
+            <camel:setHeader headerName="branch-fin">
+                <camel:simple>desenvolvimento</camel:simple>
+            </camel:setHeader>
+            <camel:setHeader headerName="file-prefix">
+                <camel:simple>table</camel:simple>
+            </camel:setHeader>
             <camel:to uri="direct:get-diffs"/>
         </camel:route>
     </camel:camelContext>
