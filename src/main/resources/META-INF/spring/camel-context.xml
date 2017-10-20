@@ -80,12 +80,18 @@
                     <camel:method
                         method="fileExists('target/work/git-repo-temp')" ref="fileUtils"/>
                     <camel:log id="_logGitPull" message="Repositorio Local existente: será feito git pull"/>
-                    <camel:to id="_toGitPull" uri="exec:git?args=pull --all&amp;workingDir=target/work/git-repo-temp"/>
+                    <camel:setHeader headerName="CamelExecCommandWorkingDir">
+                		<camel:simple>target/work/git-repo-temp</camel:simple>
+            		</camel:setHeader>
+                    <camel:to id="_toGitPull" uri="exec:git?args=pull --all"/>
                     <camel:log id="_log3" message="Repositorio Git Atualizado"/>
                 </camel:when>
                 <camel:otherwise id="_otherwiseExisteGitLocal">
                     <camel:log id="_logGitClone" message="Repositorio Local inexistente: será feito git clone"/>
-                    <camel:to id="_toGitClone" uri="exec:git?args=clone {{git.remotePath}} git-repo-temp&amp;workingDir=target/work"/>
+                    <camel:setHeader headerName="CamelExecCommandWorkingDir">
+                		<camel:simple>target/work</camel:simple>
+            		</camel:setHeader>
+                    <camel:to id="_toGitClone" uri="exec:git?args=clone {{git.remotePath}} git-repo-temp"/>
                     <camel:log id="_log4" message="Repositorio Git Clonado"/>
                 </camel:otherwise>
             </camel:choice>
@@ -177,8 +183,11 @@
         </camel:route>
         <camel:route id="perform-git">
             <camel:from id="_from1" uri="direct:perform-git"/>
-            <camel:to id="_toGitAdd" uri='exec:git?args=add *.csv &amp;workingDir=target/work/git-repo-temp'/>
-            <camel:to id="_toGitCommit" uri='exec:git?args=commit -a -m "[AUTOMATICO] Alterações detectadas" &amp;workingDir=target/work/git-repo-temp'/>
+            <camel:setHeader headerName="CamelExecCommandWorkingDir">
+                <camel:simple>target/work/git-repo-temp</camel:simple>
+            </camel:setHeader>
+            <camel:to id="_toGitAdd" uri="exec:git?args=add *.csv"/>
+            <camel:to id="_toGitCommit" uri='exec:git?args=commit -a -m "[AUTOMATICO] Alterações detectadas"'/>
             <camel:recipientList id="_recipientListExec Git Push (URI DINAMICO)">
             	<camel:simple>exec:git?args=push --set-upstream origin ${in.header.working-branch} &amp;workingDir=target/work/git-repo-temp</camel:simple>
             </camel:recipientList>
@@ -189,34 +198,54 @@
             <camel:setHeader headerName="CamelExecCommandArgs">
                 <camel:simple>log -1 --format=%cd --date=relative ${in.header.working-branch}</camel:simple>
             </camel:setHeader>
-            <camel:to uri="exec:git?workingDir=target/work/git-repo-temp"/>
+            <camel:setHeader headerName="CamelExecCommandWorkingDir">
+                <camel:simple>target/work/git-repo-temp</camel:simple>
+            </camel:setHeader>
+            <camel:to uri="exec:git"/>
+            <convertBodyTo type="java.lang.String"/>
             <camel:log message="[${in.header.working-branch}] Última Alteração (Relativa): ${body}"/>
             <camel:setHeader headerName="$simple{in.header.working-branch}.last-commit-relative">
                 <camel:simple>${body}</camel:simple>
             </camel:setHeader>
-            <!-- camel:setHeader headerName="CamelFileName">
-                <camel:simple>${in.header.working-branch}.last-commit-relative".txt</camel:simple>
+            <camel:setHeader headerName="CamelFileName">
+                <camel:simple>${in.header.working-branch}.last-commit-relative.txt</camel:simple>
             </camel:setHeader>
-            <camel:to uri="file:target/work"/-->
+            <camel:to uri="file:target/work"/>
             <camel:setHeader headerName="CamelExecCommandArgs">
                 <camel:simple>log -1 --format=%cd --date=format:%d/%m/%Y ${in.header.working-branch}</camel:simple>
             </camel:setHeader>
-            <camel:to uri="exec:git?workingDir=target/work/git-repo-temp"/>
+            <camel:to uri="exec:git"/>
+            <convertBodyTo type="java.lang.String"/>
             <camel:log message="[${in.header.working-branch}] Última Alteração (Data): ${body}"/>
             <camel:setHeader headerName="$simple{in.header.working-branch}.last-commit">
                 <camel:simple>${body}</camel:simple>
             </camel:setHeader>
+            <camel:setHeader headerName="CamelFileName">
+                <camel:simple>${in.header.working-branch}.last-commit.txt</camel:simple>
+            </camel:setHeader>
+            <camel:to uri="file:target/work"/>
         </camel:route>
+        
+        <camel:route id="_get-diffs">
+        	<camel:from uri="direct:get-diffs"/>
+        	<camel:setHeader headerName="CamelExecCommandArgs">
+                <camel:simple>diff --numstat homologacao:table-metadata.csv desenvolvimento:table-metadata.csv</camel:simple>
+            </camel:setHeader>
+            <camel:setHeader headerName="CamelExecCommandWorkingDir">
+                <camel:simple>target/work/git-repo-temp</camel:simple>
+            </camel:setHeader>
+            <camel:to uri="exec:git"/>
+            <convertBodyTo type="java.lang.String"/>
+            <camel:log message="Diff: ${body}"/>
+            <camel:setHeader headerName="table-metadata.homologacao.desenvolvimento">
+                <camel:simple>${body}</camel:simple>
+            </camel:setHeader>
+            <to uri="log:debug?showHeaders=true&amp;multiline=true"/>
+        </camel:route>
+        
         <camel:route id="_routeTest" autoStartup="false">
             <camel:from uri="timer://timerMain?period=30m"/>
-            <camel:setHeader headerName="working-branch">
-                <constant>producao</constant>
-            </camel:setHeader>
-            <camel:to uri="direct:get-last-commit-time"/>
-            <camel:setHeader headerName="working-branch">
-                <constant>simulado</constant>
-            </camel:setHeader>
-            <camel:to uri="direct:get-last-commit-time"/>
+            <camel:to uri="direct:get-diffs"/>
         </camel:route>
     </camel:camelContext>
 </beans>
