@@ -73,14 +73,14 @@
             <camel:log id="_log7" message="********* FIM *********"/>
         </camel:route>
         <camel:route id="prepare-git">
-            <camel:from id="_fromStartPrepareGit" uri="direct:prepare-git"/>
+            <camel:from id="_fromPrepareGit" uri="direct:prepare-git"/>
             <camel:to id="_toMkdirWork" uri="exec:mkdir?args=target/work -p"/>
             <camel:choice id="_choiceGitLocal">
                 <camel:when id="_whenExisteGitLocal">
-                    <camel:method
+                    <camel:method id="_methodFileExists"
                         method="fileExists('target/work/git-repo-temp')" ref="fileUtils"/>
                     <camel:log id="_logGitPull" message="Repositorio Local existente: será feito git pull"/>
-                    <camel:setHeader headerName="CamelExecCommandWorkingDir">
+                    <camel:setHeader id="_SetHeader01" headerName="CamelExecCommandWorkingDir">
                 		<camel:simple>target/work/git-repo-temp</camel:simple>
             		</camel:setHeader>
                     <camel:to id="_toGitPull" uri="exec:git?args=pull --all"/>
@@ -88,7 +88,7 @@
                 </camel:when>
                 <camel:otherwise id="_otherwiseExisteGitLocal">
                     <camel:log id="_logGitClone" message="Repositorio Local inexistente: será feito git clone"/>
-                    <camel:setHeader headerName="CamelExecCommandWorkingDir">
+                    <camel:setHeader id="_SetHeader02" headerName="CamelExecCommandWorkingDir">
                 		<camel:simple>target/work</camel:simple>
             		</camel:setHeader>
                     <camel:to id="_toGitClone" uri="exec:git?args=clone {{git.remotePath}} git-repo-temp"/>
@@ -100,9 +100,9 @@
             <from id="_from2" uri="direct:perBranch"/>
             <log id="_log8" message="[$simple{in.header.working-branch}] Datasource: $simple{in.header.working-datasource}"/>
             <camel:to id="_toPrepare-branch-git" uri="direct:prepare-branch-git"/>
-            <camel:to id="_toPrepare-branch-git" uri="direct:query-2-csv"/>
-            <camel:to id="_to1" uri="direct:perform-git"/>
-            <camel:to uri="direct:get-last-commit-time"/>
+            <camel:to id="_toQuery2Csv" uri="direct:query-2-csv"/>
+            <camel:to id="_toPerformGit" uri="direct:perform-git"/>
+            <camel:to id="_toGetLastCommitTime" uri="direct:get-last-commit-time"/>
         </camel:route>
         <camel:route id="prepare-branch-git">
             <camel:from id="_fromStartPrepareGit" uri="direct:prepare-branch-git"/>
@@ -128,7 +128,7 @@
             <camel:recipientList id="_recipientListJdbc JDBC (URI DINAMICO)">
                 <camel:simple>jdbc:${in.header.working-branch}.dataSource</camel:simple>
             </camel:recipientList>
-            <camel:marshal id="_marshalRStoCSV">
+            <camel:marshal id="_marshalRStoCSV01">
                 <camel:csv>
                 	<camel:header>SCHEMA</camel:header>
                 	<camel:header>TYPE</camel:header>
@@ -165,7 +165,7 @@
             <camel:recipientList id="_recipientListJdbc JDBC (URI DINAMICO)">
                 <camel:simple>jdbc:${in.header.working-branch}.dataSource</camel:simple>
             </camel:recipientList>
-            <camel:marshal id="_marshalRStoCSV">
+            <camel:marshal id="_marshalRStoCSV02">
                 <camel:csv>
                 	<camel:header>SCHEMA</camel:header>
                 	<camel:header>TYPE</camel:header>
@@ -175,7 +175,7 @@
                 	<camel:header>COMMENTS</camel:header>
                 </camel:csv>
             </camel:marshal>
-            <camel:setHeader headerName="CamelFileName" id="_setHeaderCSVFileName">
+            <camel:setHeader id="_SetHeaderCSVFileName" headerName="CamelFileName">
                 <camel:constant>column-metadata.csv</camel:constant>
             </camel:setHeader>
             <camel:to id="_toCSVFile" uri="file:target/work/git-repo-temp"/>
