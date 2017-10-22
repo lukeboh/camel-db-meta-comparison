@@ -187,6 +187,10 @@
                 <camel:simple>target/work/git-repo-temp</camel:simple>
             </camel:setHeader>
             <camel:to id="_toGitAdd" uri="exec:git?args=add *.csv"/>
+            <to uri="log:testeHeaderAposExec?showHeaders=true&amp;multiline=true"/>
+            <camel:setHeader headerName="CamelExecCommandWorkingDir">
+                <camel:simple>target/work/git-repo-temp</camel:simple>
+            </camel:setHeader>
             <camel:to id="_toGitCommit" uri='exec:git?args=commit -a -m "[AUTOMATICO] Alterações detectadas"'/>
             <camel:recipientList id="_recipientListExec Git Push (URI DINAMICO)">
             	<camel:simple>exec:git?args=push --set-upstream origin ${in.header.working-branch} &amp;workingDir=target/work/git-repo-temp</camel:simple>
