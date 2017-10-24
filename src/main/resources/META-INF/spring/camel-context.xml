@@ -187,7 +187,6 @@
                 <camel:simple>target/work/git-repo-temp</camel:simple>
             </camel:setHeader>
             <camel:to id="_toGitAdd" uri="exec:git?args=add *.csv"/>
-            <to uri="log:testeHeaderAposExec?showHeaders=true&amp;multiline=true"/>
             <camel:setHeader headerName="CamelExecCommandWorkingDir">
                 <camel:simple>target/work/git-repo-temp</camel:simple>
             </camel:setHeader>
@@ -232,6 +231,18 @@
         
         <camel:route id="_get-diffs">
         	<camel:from uri="direct:get-diffs"/>
+        	<camel:setHeader headerName="file-prefix">
+                <camel:simple>table</camel:simple>
+            </camel:setHeader>
+            <camel:to uri="direct:get-diffs-file"/>
+            <camel:setHeader headerName="file-prefix">
+                <camel:simple>column</camel:simple>
+            </camel:setHeader>
+            <camel:to uri="direct:get-diffs-file"/>
+        </camel:route>
+        
+        <camel:route id="_get-diffs-file">
+        	<camel:from uri="direct:get-diffs-file"/>
         	<camel:setHeader headerName="CamelExecCommandArgs">
                 <camel:simple>diff --numstat ${in.header.branch-ini}:${in.header.file-prefix}-metadata.csv ${in.header.branch-fin}:${in.header.file-prefix}-metadata.csv</camel:simple>
             </camel:setHeader>
@@ -254,13 +265,24 @@
         <camel:route id="_routeTest" autoStartup="true">
             <camel:from uri="timer://timerMain?period=30m"/>
              <camel:setHeader headerName="branch-ini">
+                <camel:simple>producao</camel:simple>
+            </camel:setHeader>
+            <camel:setHeader headerName="branch-fin">
+                <camel:simple>simulado</camel:simple>
+            </camel:setHeader>
+            <camel:to uri="direct:get-diffs"/>
+            <camel:setHeader headerName="branch-ini">
+                <camel:simple>simulado</camel:simple>
+            </camel:setHeader>
+            <camel:setHeader headerName="branch-fin">
+                <camel:simple>homologacao</camel:simple>
+            </camel:setHeader>
+            <camel:to uri="direct:get-diffs"/>
+            <camel:setHeader headerName="branch-ini">
                 <camel:simple>homologacao</camel:simple>
             </camel:setHeader>
             <camel:setHeader headerName="branch-fin">
                 <camel:simple>desenvolvimento</camel:simple>
-            </camel:setHeader>
-            <camel:setHeader headerName="file-prefix">
-                <camel:simple>table</camel:simple>
             </camel:setHeader>
             <camel:to uri="direct:get-diffs"/>
         </camel:route>
