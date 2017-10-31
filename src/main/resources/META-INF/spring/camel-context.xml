@@ -258,8 +258,8 @@
                 <camel:simple>${in.header.file-prefix}-metadata.${in.header.branch-ini}.${in.header.branch-fin}.txt</camel:simple>
             </camel:setHeader>
             <camel:to uri="file:target/work"/>
-            <camel:split>
-            	<camel:tokenize token="	">${body}</camel:tokenize>
+            <camel:split id="_split1">
+            	<camel:tokenize token="\t"/>
             	<to uri="log:SPLIT?showHeaders=true&amp;multiline=true"/>
             	<camel:log id="_log104" message="[SPLIT] ${body}"/>
             </camel:split>
