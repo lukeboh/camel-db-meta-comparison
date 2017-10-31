@@ -251,7 +251,6 @@
             </camel:setHeader>
             <camel:to uri="exec:git"/>
             <convertBodyTo type="java.lang.String"/>
-            <camel:log message="Diff: ${body}"/>
             <camel:setHeader headerName="$simple{in.header.file-prefix}-metadata.$simple{in.header.branch-ini}.$simple{in.header.branch-fin}">
                 <camel:simple>${body}</camel:simple>
             </camel:setHeader>
@@ -259,7 +258,11 @@
                 <camel:simple>${in.header.file-prefix}-metadata.${in.header.branch-ini}.${in.header.branch-fin}.txt</camel:simple>
             </camel:setHeader>
             <camel:to uri="file:target/work"/>
-            <to uri="log:debug?showHeaders=true&amp;multiline=true"/>
+            <camel:split>
+            	<camel:tokenize token="	">${body}</camel:tokenize>
+            	<to uri="log:SPLIT?showHeaders=true&amp;multiline=true"/>
+            	<camel:log id="_log104" message="[SPLIT] ${body}"/>
+            </camel:split>
         </camel:route>
         
         <camel:route id="_routeTest" autoStartup="true">
