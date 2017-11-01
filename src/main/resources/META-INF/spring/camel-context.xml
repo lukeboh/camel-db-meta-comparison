@@ -36,7 +36,7 @@
     <context:property-placeholder location="file:config.properties"/>
     <camel:camelContext id="camel-db-meta-comparison-context" xmlns="http://camel.apache.org/schema/spring">
         <propertyPlaceholder id="myPropertyPlaceholder" location="file:config.properties"/>
-        <camel:route id="_routeMain" autoStartup="false">
+        <camel:route id="_routeMain" autoStartup="true">
             <camel:from id="_from0" uri="timer://timerMain?period=30m"/>
             <camel:to id="_toPrepare-git" uri="direct:prepare-git"/>
             <!-- PRODUCAO -->
@@ -71,6 +71,29 @@
                 <camel:simple>ref:desenvolvimento.dataSource</camel:simple>
             </camel:setHeader>
             <camel:to id="_toDesenvolvimento" uri="direct:perBranch"/>
+            
+            <camel:setHeader headerName="branch-ini">
+                <camel:simple>producao</camel:simple>
+            </camel:setHeader>
+            <camel:setHeader headerName="branch-fin">
+                <camel:simple>simulado</camel:simple>
+            </camel:setHeader>
+            <camel:to uri="direct:get-diffs"/>
+            <camel:setHeader headerName="branch-ini">
+                <camel:simple>simulado</camel:simple>
+            </camel:setHeader>
+            <camel:setHeader headerName="branch-fin">
+                <camel:simple>homologacao</camel:simple>
+            </camel:setHeader>
+            <camel:to uri="direct:get-diffs"/>
+            <camel:setHeader headerName="branch-ini">
+                <camel:simple>homologacao</camel:simple>
+            </camel:setHeader>
+            <camel:setHeader headerName="branch-fin">
+                <camel:simple>desenvolvimento</camel:simple>
+            </camel:setHeader>
+            <camel:to uri="direct:get-diffs"/>
+            <camel:to uri="direct:to-json"/>
             <camel:log id="_log7" message="********* FIM *********"/>
         </camel:route>
         <camel:route id="_prepare-git">
@@ -269,6 +292,7 @@
             <camel:removeHeaders pattern="branch*"/>
             <camel:removeHeaders pattern="bread*"/>
             <camel:removeHeaders pattern="file*"/>
+            <camel:removeHeaders pattern="working*"/>
             <camel:setBody id="_setBody101">
                 <camel:simple>${headers}</camel:simple>
             </camel:setBody>
@@ -282,31 +306,10 @@
             <camel:to uri="file:target/work"/>
             
         </camel:route>
-        
-        <camel:route id="_routeTest" autoStartup="true">
+        <!-- 
+        <camel:route id="_routeTest" autoStartup="false">
             <camel:from uri="timer://timerMain?period=30m"/>
-             <camel:setHeader headerName="branch-ini">
-                <camel:simple>producao</camel:simple>
-            </camel:setHeader>
-            <camel:setHeader headerName="branch-fin">
-                <camel:simple>simulado</camel:simple>
-            </camel:setHeader>
-            <camel:to uri="direct:get-diffs"/>
-            <camel:setHeader headerName="branch-ini">
-                <camel:simple>simulado</camel:simple>
-            </camel:setHeader>
-            <camel:setHeader headerName="branch-fin">
-                <camel:simple>homologacao</camel:simple>
-            </camel:setHeader>
-            <camel:to uri="direct:get-diffs"/>
-            <camel:setHeader headerName="branch-ini">
-                <camel:simple>homologacao</camel:simple>
-            </camel:setHeader>
-            <camel:setHeader headerName="branch-fin">
-                <camel:simple>desenvolvimento</camel:simple>
-            </camel:setHeader>
-            <camel:to uri="direct:get-diffs"/>
-            <camel:to uri="direct:to-json"/>
         </camel:route>
+         -->
     </camel:camelContext>
 </beans>
