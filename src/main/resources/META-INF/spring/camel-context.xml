@@ -262,6 +262,33 @@
             	<camel:tokenize token="\t"/>
             	<to uri="log:SPLIT?showHeaders=true&amp;multiline=true"/>
             	<camel:log id="_log104" message="[SPLIT] ${body}"/>
+                <camel:choice id="_choice01">
+                    <when id="_when011">
+                        <simple>${in.header.CamelSplitIndex} == 0</simple>
+                        <setHeader headerName="diff-appendix" id="_setHeader011">
+                            <constant>insertions</constant>
+                        </setHeader>
+                    </when>
+                    <when id="_when012">
+                        <simple>${in.header.CamelSplitIndex} == 1</simple>
+                        <setHeader headerName="diff-appendix" id="_setHeader012">
+                            <constant>deletions</constant>
+                        </setHeader>
+                    </when>
+                    <otherwise id="_otherwise01">
+                        <setHeader headerName="diff-appendix" id="_setHeader01o">
+                            <constant>file-name</constant>
+                        </setHeader>
+                    </otherwise>
+                </camel:choice>
+            	<camel:setHeader headerName="$simple{in.header.file-prefix}-metadata.$simple{in.header.branch-ini}.$simple{in.header.branch-fin}.$simple{in.header.diff-appendix}">
+                	<camel:simple>${body}</camel:simple>
+	            </camel:setHeader>
+	             <camel:setHeader headerName="CamelFileName">
+	                <camel:simple>${in.header.file-prefix}-metadata.${in.header.branch-ini}.${in.header.branch-fin}.${in.header.diff-appendix}.txt</camel:simple>
+	            </camel:setHeader>
+	            <camel:to uri="file:target/work"/>
+
             </camel:split>
         </camel:route>
         
