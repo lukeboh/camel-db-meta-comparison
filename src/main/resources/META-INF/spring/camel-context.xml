@@ -287,8 +287,8 @@
         </camel:route>
         
         <camel:route id="_to-json">
-        	<camel:from uri="direct:to-json"/>
-        	<camel:removeHeaders pattern="Camel*"/>
+            <camel:from uri="direct:to-json"/>
+            <camel:removeHeaders pattern="Camel*"/>
             <camel:removeHeaders pattern="branch*"/>
             <camel:removeHeaders pattern="bread*"/>
             <camel:removeHeaders pattern="file*"/>
