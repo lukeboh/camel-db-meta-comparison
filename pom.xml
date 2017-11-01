@@ -8,11 +8,8 @@
   <name>Rota Camel para comparar modelos de versões de bancos de dados</name>
   <properties>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <camel.osgi.export.pkg>org.apache.camel.example.jdbc.*</camel.osgi.export.pkg>
     <category>Database</category>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <title>JDBC</title>
-    <camel.osgi.dynamic>*</camel.osgi.dynamic>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -47,14 +44,6 @@
       <artifactId>spring-jdbc</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.derby</groupId>
-      <artifactId>derby</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>commons-dbcp</groupId>
-      <artifactId>commons-dbcp</artifactId>
-    </dependency>
-    <dependency>
       <groupId>com.github.noraui</groupId>
       <artifactId>ojdbc7</artifactId>
       <version>12.1.0.2</version>
@@ -82,28 +71,11 @@
     </dependency>
     <dependency>
       <groupId>org.apache.camel</groupId>
-      <artifactId>camel-avro</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.camel</groupId>
       <artifactId>camel-csv</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.camel</groupId>
-      <artifactId>camel-script</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.camel</groupId>
-      <artifactId>camel-ognl</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.camel</groupId>
       <artifactId>camel-exec</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.camel</groupId>
-      <artifactId>camel-flatpack</artifactId>
-      <version>2.19.3</version>
     </dependency>
   </dependencies>
   <build>
