@@ -5,7 +5,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd     http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
     <bean class="br.jus.tse.corporativa.io.FileUtils" id="fileUtils" scope="singleton"/>
     <camel:camelContext id="camel-context-test" xmlns="http://camel.apache.org/schema/spring">
-        <camel:route id="_routeTest">
+        <camel:route autoStartup="false" id="_routeTest">
             <camel:from id="_from1" uri="timer://timerMain?period=30m"/>
             <camel:setHeader headerName="header-test" id="_setHeader1">
                 <camel:simple>Uma frase armazenada com header:\tbarra-tab space	tab</camel:simple>
@@ -15,6 +15,25 @@
             </camel:setBody>
             <camel:split id="_split1">
                 <tokenize token="\t"/>
+                <camel:choice id="_choice01">
+                    <when id="_when011">
+                        <simple>${index} == 0</simple>
+                        <setHeader headerName="diff-appendix" id="_setHeader011">
+                            <constant>insertions</constant>
+                        </setHeader>
+                    </when>
+                    <when id="_when012">
+                        <simple>${index} == 1</simple>
+                        <setHeader headerName="diff-appendix" id="_setHeader012">
+                            <constant>deletions</constant>
+                        </setHeader>
+                    </when>
+                    <otherwise id="_otherwise01">
+                        <setHeader headerName="diff-appendix" id="_setHeader01o">
+                            <constant>file-name</constant>
+                        </setHeader>
+                    </otherwise>
+                </camel:choice>
                 <log id="_log2" message="[SPLIT] ${body}"/>
             </camel:split>
             <camel:setBody id="_setBody2">
@@ -23,7 +42,7 @@
             <camel:marshal id="_marshal1">
                 <camel:json library="Jackson" prettyPrint="true"/>
             </camel:marshal>
-            <camel:log id="_log1" message="BODY [${body}]"/>
+            <camel:log id="_log1" message="Json [${body}]"/>
             <to id="_to1" uri="log:LUCIANO?showHeaders=true&amp;multiline=true"/>
         </camel:route>
     </camel:camelContext>
