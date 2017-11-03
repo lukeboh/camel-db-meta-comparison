@@ -20,7 +20,7 @@ public class DiffExtractorInfoProcessor implements Processor {
 		String branchIni = (String) in.getHeader("branch-ini");
 		String branchFin = (String) in.getHeader("branch-fin");
 		
-		in.setHeader(filePrefix + "-metadata." + branchIni +"." + branchFin + ".insertions", insertions);
-		in.setHeader(filePrefix + "-metadata." + branchIni +"." + branchFin + ".deletions", deletions);
+		in.setHeader(filePrefix + "-metadata-" + branchIni +"-" + branchFin + "-insertions", insertions);
+		in.setHeader(filePrefix + "-metadata-" + branchIni +"-" + branchFin + "-deletions", deletions);
 	}
 }

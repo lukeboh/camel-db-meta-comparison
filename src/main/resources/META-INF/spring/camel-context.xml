@@ -231,11 +231,11 @@
             <camel:to uri="exec:git"/>
             <convertBodyTo type="java.lang.String"/>
             <camel:log message="[${in.header.working-branch}] Última Alteração (Relativa): ${body}"/>
-            <camel:setHeader headerName="$simple{in.header.working-branch}.last-commit-relative">
+            <camel:setHeader headerName="$simple{in.header.working-branch}-last-commit-relative">
                 <camel:simple>${body}</camel:simple>
             </camel:setHeader>
             <camel:setHeader headerName="CamelFileName">
-                <camel:simple>${in.header.working-branch}.last-commit-relative.txt</camel:simple>
+                <camel:simple>${in.header.working-branch}-last-commit-relative.txt</camel:simple>
             </camel:setHeader>
             <camel:to uri="file:target/work"/>
             <camel:setHeader headerName="CamelExecCommandArgs">
@@ -244,11 +244,11 @@
             <camel:to uri="exec:git"/>
             <convertBodyTo type="java.lang.String"/>
             <camel:log message="[${in.header.working-branch}] Última Alteração (Data): ${body}"/>
-            <camel:setHeader headerName="$simple{in.header.working-branch}.last-commit">
+            <camel:setHeader headerName="$simple{in.header.working-branch}-last-commit">
                 <camel:simple>${body}</camel:simple>
             </camel:setHeader>
             <camel:setHeader headerName="CamelFileName">
-                <camel:simple>${in.header.working-branch}.last-commit.txt</camel:simple>
+                <camel:simple>${in.header.working-branch}-last-commit.txt</camel:simple>
             </camel:setHeader>
             <camel:to uri="file:target/work"/>
         </camel:route>
@@ -277,11 +277,11 @@
             <convertBodyTo type="java.lang.String" />
             <camel:to uri="diffExtractorProcessor"/>
             <camel:log id="_log094" message="[PROCESSADO] branch-ini[$simple{in.header.branch-ini}] branch-fin[$simple{in.header.branch-fin}] body [$simple{body}] "/>
-            <camel:setHeader headerName="$simple{in.header.file-prefix}-metadata.$simple{in.header.branch-ini}.$simple{in.header.branch-fin}">
+            <camel:setHeader headerName="$simple{in.header.file-prefix}-metadata-$simple{in.header.branch-ini}-$simple{in.header.branch-fin}">
                 <camel:simple>${body}</camel:simple>
             </camel:setHeader>
              <camel:setHeader headerName="CamelFileName">
-                <camel:simple>${in.header.file-prefix}-metadata.${in.header.branch-ini}.${in.header.branch-fin}.txt</camel:simple>
+                <camel:simple>${in.header.file-prefix}-metadata-${in.header.branch-ini}-${in.header.branch-fin}.txt</camel:simple>
             </camel:setHeader>
             <camel:to uri="file:target/work"/>
         </camel:route>
