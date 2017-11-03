@@ -1,0 +1,171 @@
+html {
+    height: 100%;
+}
+
+body {
+    height: 100%;
+    font-family: "Overpass", "Open Sans", Helvetica, sans-serif;
+    color: #424242;
+    font-weight: 200;
+    margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: 600;
+    font-style: normal;
+    color: #222;
+    text-rendering: optimizeLegibility;
+    margin-top: 5px;
+    margin-bottom: 0;
+    line-height: 1.4;
+    text-align: center;
+}
+
+p {
+    font-size: 15px;
+}
+
+table.jb-table {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.jb-table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+.jb-table th {
+    font-size: 14px;
+    font-weight: normal;
+    padding: 10px 5px;
+    word-break: normal;
+}
+
+tr.jb-row-title {
+    height: 70px;
+}
+
+.jb-container.cont-title h1 {
+    text-transform: uppercase;
+    text-align: center;
+    font-size: 2.5em;
+    font-weight: 700;
+}
+
+.jb-table .jb-container {
+    vertical-align: top;
+    width: 25%;
+    border: 2px solid #fff;
+}
+
+.jb-container.cont-1 {
+    background: #cc0000;
+    /* Old browsers */
+    background: -moz-linear-gradient(45deg, #a2a038 0%, #c5c726 100%);
+    /* FF3.6-15 */
+    background: -webkit-linear-gradient(45deg, #a2a038 0%, #c5c726 100%);
+    /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(45deg, #a2a038 0%, #c5c726 100%);
+    /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#7f7d25', endColorstr='afb11d', GradientType=1);
+    /* IE6-9 fallback on horizontal gradient */
+}
+
+.jb-container.cont-2 {
+    background: #004156;
+    /* Old browsers */
+    background: -moz-linear-gradient(45deg, #00564a 0%, #00875b 100%);
+    /* FF3.6-15 */
+    background: -webkit-linear-gradient(45deg, #00564a 0%, #00875b 100%);
+    /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(45deg, #00564a 0%, #00875b 100%);
+    /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00564a', endColorstr='#00875b', GradientType=1);
+    /* IE6-9 fallback on horizontal gradient */
+}
+
+.jb-container.cont-3 {
+    background: #cc0000;
+    /* Old browsers */
+    background: -moz-linear-gradient(45deg, #cc0000 0%, #820000 100%);
+    /* FF3.6-15 */
+    background: -webkit-linear-gradient(45deg, #cc0000 0%, #820000 100%);
+    /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(45deg, #cc0000 0%, #820000 100%);
+    /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cc0000', endColorstr='#820000', GradientType=1);
+    /* IE6-9 fallback on horizontal gradient */
+}
+
+.jb-container.cont-4 {
+    background: #004156;
+    /* Old browsers */
+    background: -moz-linear-gradient(45deg, #004156 0%, #007a87 100%);
+    /* FF3.6-15 */
+    background: -webkit-linear-gradient(45deg, #004156 0%, #007a87 100%);
+    /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(45deg, #004156 0%, #007a87 100%);
+    /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#004156', endColorstr='#007a87', GradientType=1);
+    /* IE6-9 fallback on horizontal gradient */
+}
+
+.jb-container .jb-content {
+    color: #FFF;
+    font-size: 1.2em;
+}
+
+.jb-content .jb-content-title {
+    font-size: 1.3em;
+    margin: auto;
+    width: 100%;
+    text-align: center;
+}
+
+.info-diff {
+    position: relative;
+    color: #fff;
+    background-color: #424242;
+    border: 2px solid #fff;
+    text-align: center;
+    font-size: 3em;
+    padding: 3px 7px 5px 8px;
+    border-radius: 25px;
+    left: -180px;
+    width: 360px;
+    margin-top: 110px;
+    margin-bottom: 50px;
+}
+
+.a-menos {
+    color: limegreen;
+    min-width: 80px;
+}
+
+.a-mais {
+    color: orangered;
+}
+
+.jb-container a.button {
+    background-color: #fff;
+    padding: 3px 10px;
+    margin-bottom: 10px;
+    text-decoration: none;
+    color: #007a87;
+    border-radius: 8px;
+}
+
+.jb-container a.button:hover {
+    background-color: #f0f0f0;
+}
