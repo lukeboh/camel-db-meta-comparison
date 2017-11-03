@@ -6,7 +6,7 @@
     <bean id="fileUtils" class="br.jus.tse.corporativa.io.FileUtils" scope="singleton"/>
     <bean id="diffExtractorProcessor" class="br.jus.tse.corporativa.util.camel.DiffExtractorInfoProcessor" scope="singleton"/>
     <bean class="oracle.jdbc.pool.OracleDataSource"
-        destroy-method="close" id="producao.dataSource">
+        destroy-method="close" id="producao.dataSource" primary="true">
         <property name="URL" value="${producao.URL}"/>
         <property name="user" value="${producao.user}"/>
         <property name="password" value="${producao.password}"/>
