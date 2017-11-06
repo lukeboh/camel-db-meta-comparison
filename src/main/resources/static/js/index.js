@@ -16,7 +16,7 @@ function updateValues() {
         }
       };
 
-    xhr.open("GET", "http://localhost:8080/target/work/index.json");
+    xhr.open("GET", "/target/work/index.json");
     
     xhr.addEventListener("load", function() {
         if (xhr.status == 200) {
