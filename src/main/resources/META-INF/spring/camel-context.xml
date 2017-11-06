@@ -174,6 +174,21 @@
                 <camel:constant>column</camel:constant>
             </camel:setHeader>
             <camel:to id="_toQuery-2-CSV-Param-Column" uri="direct:query-2-csv-parametrizado"/>
+            
+            <camel:setBody id="_setBodyQueryIndex">
+                <camel:constant>
+             select di.owner schema, 'INDEX' type, di.table_name owner, di.INDEX_NAME object, LISTAGG(dic.COLUMN_POSITION || '-' || dic.COLUMN_NAME, ',') WITHIN GROUP (ORDER BY COLUMN_POSITION) AS complement, ' ' as COMMENTS
+               from SYS.DBA_INDEXES di
+               join SYS.DBA_IND_COLUMNS dic on dic.INDEX_OWNER = di.owner and dic.INDEX_NAME = di.INDEX_NAME
+              where di.owner = 'ADMCAD'
+              group by di.owner, 'INDEX', di.table_name, di.INDEX_NAME
+              order by 1, 2, 3 ,4
+                </camel:constant>
+            </camel:setBody>
+            <camel:setHeader id="_SetHeaderCSVIndexFileName" headerName="file-prefix">
+                <camel:constant>index</camel:constant>
+            </camel:setHeader>
+            <camel:to id="_toQuery-2-CSV-Param-Index" uri="direct:query-2-csv-parametrizado"/>
         </camel:route>
 
         <camel:route id="_query-2-csv-parametrizado">
@@ -246,7 +261,7 @@
             </camel:setHeader>
             <camel:to uri="file:target/work"/>
         </camel:route>
-        
+
         <camel:route id="_get-diffs">
             <camel:from uri="direct:get-diffs"/>
             <camel:setHeader headerName="file-prefix">
@@ -257,8 +272,12 @@
                 <camel:simple>column</camel:simple>
             </camel:setHeader>
             <camel:to uri="direct:get-diffs-file"/>
+            <camel:setHeader headerName="file-prefix">
+                <camel:simple>index</camel:simple>
+            </camel:setHeader>
+            <camel:to uri="direct:get-diffs-file"/>
         </camel:route>
-        
+
         <camel:route id="_get-diffs-file">
             <camel:from uri="direct:get-diffs-file"/>
             <camel:setHeader headerName="CamelExecCommandArgs">
