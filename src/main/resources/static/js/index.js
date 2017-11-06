@@ -1,10 +1,17 @@
-alert("carregou25");
+alert("carregou26");
 
 function updateValues(event) {
     
     event.preventDefault();
     
     var xhr = new XMLHttpRequest();
+    
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4 && xhr.status == 0) {
+          console.log("FALHA DE REDE");
+        }
+      };
+
     xhr.open("GET", "http://localhost:8080/target/work/index.json");
     
     xhr.addEventListener("load", function() {
