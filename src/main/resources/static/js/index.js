@@ -1,14 +1,18 @@
-alert("carregou26");
-
 function updateValues(event) {
     
     event.preventDefault();
+    updateValues();
+}
+
+function updateValues() {
+    errorMessage = document.querySelector("#error");
     
     var xhr = new XMLHttpRequest();
     
     xhr.onreadystatechange = function() {
         if (xhr.readyState == 4 && xhr.status == 0) {
           console.log("FALHA DE REDE");
+          errorMessage.textContent = "Off-Line";
         }
       };
 
@@ -16,6 +20,7 @@ function updateValues(event) {
     
     xhr.addEventListener("load", function() {
         if (xhr.status == 200) {
+            errorMessage.textContent = "";
             var resposta = xhr.responseText;
             //console.log(resposta);
             var result = JSON.parse(resposta);
@@ -42,9 +47,6 @@ function updateValues(event) {
     xhr.send();
 }
 
-var titulo = document.querySelector(".jb-row-title");
-titulo.addEventListener("click", updateValues);
-
 function startTimer(duration, display) {
     var timer = duration, minutes, seconds;
     setInterval(function () {
@@ -58,13 +60,17 @@ function startTimer(duration, display) {
 
         if (--timer < 0) {
             timer = duration;
-
+            updateValues();
         }
     }, 1000);
 }
 
 window.onload = function () {
+    updateValues();
     var period = 60 * 1,
         display = document.querySelector("#timer");
     startTimer(period, display);
 };
+
+var titulo = document.querySelector(".jb-row-title");
+titulo.addEventListener("click", updateValues);
