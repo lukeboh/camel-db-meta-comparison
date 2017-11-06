@@ -139,7 +139,7 @@
         <camel:route id="_query-2-csv">
             <camel:from id="_from-query" uri="direct:query-2-csv"/>
             
-            <camel:setBody id="_setBodyQuery">
+            <camel:setBody id="_setBodyQueryTable">
                 <camel:constant>
             select dt.owner schema, 'TABLE' type, dt.owner owner, dt.TABLE_NAME object, ' ' as complement, tc.COMMENTS  
               from SYS.DBA_TABLES dt 
@@ -148,27 +148,12 @@
              order by 1, 2, 3 ,4
                 </camel:constant>
             </camel:setBody>
-            <camel:log id="_log1" message="[$simple{in.header.working-branch}] Acessando o banco de dados para recuperar dados de tabelas"/>
-            <camel:recipientList id="_recipientListJdbc JDBC (URI DINAMICO)">
-                <camel:simple>jdbc:${in.header.working-branch}.dataSource</camel:simple>
-            </camel:recipientList>
-            <camel:marshal id="_marshalRStoCSV01">
-                <camel:csv>
-                    <camel:header>SCHEMA</camel:header>
-                    <camel:header>TYPE</camel:header>
-                    <camel:header>OWNER</camel:header>
-                    <camel:header>OBJECT</camel:header>
-                    <camel:header>COMPLEMENT</camel:header>
-                    <camel:header>COMMENTS</camel:header>
-                </camel:csv>
-            </camel:marshal>
-            <camel:setHeader headerName="CamelFileName" id="_setHeaderCSVFileName">
-                <camel:constant>table-metadata.csv</camel:constant>
+            <camel:setHeader id="_SetHeaderCSVTableFileName" headerName="file-prefix">
+                <camel:constant>table</camel:constant>
             </camel:setHeader>
-            <camel:to id="_toCSVFile" uri="file:target/work/git-repo-temp"/>
-            <camel:log id="_log2" message="[$simple{in.header.working-branch}] Arquivo [$simple{in.header.CamelFileName}] gerado"/>
-                        
-            <camel:setBody id="_setBodyQuery">
+            <camel:to id="_toQuery-2-CSV-Param-Table" uri="direct:query-2-csv-parametrizado"/>
+
+            <camel:setBody id="_setBodyQueryColumn">
                 <camel:constant>
             select dtc.OWNER schema, 'COLUMN' type, dtc.table_name owner, dtc.column_name object, 
                    dtc.nullable || ' ' || 
@@ -185,11 +170,19 @@
              order by 1, 2, 3 ,4
                 </camel:constant>
             </camel:setBody>
-            <camel:log id="_log1" message="[$simple{in.header.working-branch}] Acessando o banco de dados"/>
+            <camel:setHeader id="_SetHeaderCSVColumnFileName" headerName="file-prefix">
+                <camel:constant>column</camel:constant>
+            </camel:setHeader>
+            <camel:to id="_toQuery-2-CSV-Param-Column" uri="direct:query-2-csv-parametrizado"/>
+        </camel:route>
+
+        <camel:route id="_query-2-csv-parametrizado">
+            <camel:from uri="direct:query-2-csv-parametrizado"/>
+            <camel:log id="_logQuery-2-csv-1" message="[$simple{in.header.working-branch}] [$simple{in.header.file-prefix}] Consultado o banco de dados"/>
             <camel:recipientList id="_recipientListJdbc JDBC (URI DINAMICO)">
                 <camel:simple>jdbc:${in.header.working-branch}.dataSource</camel:simple>
             </camel:recipientList>
-            <camel:marshal id="_marshalRStoCSV02">
+            <camel:marshal id="_marshalRStoCSV">
                 <camel:csv>
                     <camel:header>SCHEMA</camel:header>
                     <camel:header>TYPE</camel:header>
@@ -199,12 +192,13 @@
                     <camel:header>COMMENTS</camel:header>
                 </camel:csv>
             </camel:marshal>
-            <camel:setHeader id="_SetHeaderCSVFileName" headerName="CamelFileName">
-                <camel:constant>column-metadata.csv</camel:constant>
+            <camel:setHeader headerName="CamelFileName" id="_setHeaderCSVFileName">
+                <camel:simple>${in.header.file-prefix}-metadata.csv</camel:simple>
             </camel:setHeader>
             <camel:to id="_toCSVFile" uri="file:target/work/git-repo-temp"/>
-            <camel:log id="_log2" message="[$simple{in.header.working-branch}] Arquivo [$simple{in.header.CamelFileName}] gerado"/>
+            <camel:log id="_logQuery-2-csv-2" message="[$simple{in.header.working-branch}] Arquivo [$simple{in.header.CamelFileName}] gerado"/>
         </camel:route>
+
         <camel:route id="_perform-git">
             <camel:from id="_from1" uri="direct:perform-git"/>
             <camel:setHeader headerName="CamelExecCommandWorkingDir">
