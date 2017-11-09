@@ -157,13 +157,21 @@ tr.jb-row-title {
     text-align: center;
 }
 
+a, a > table > tbody > tr > td {
+    text-decoration: none;
+}
+
+a > table > tbody > tr > td:hover {
+    text-decoration: underline;
+}
+
 .info-diff {
     position: relative;
     color: #fff;
     background-color: #424242;
     border: 2px solid #fff;
     text-align: center;
-    font-size: 3em;
+    font-size: 2.3em;
     padding: 3px 7px 5px 8px;
     border-radius: 25px;
     left: -180px;

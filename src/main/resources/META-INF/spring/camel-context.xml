@@ -191,25 +191,26 @@
             </camel:setHeader>
             <camel:to id="_toQuery-2-CSV-Param-Index" uri="direct:query-2-csv-parametrizado"/>
             
-            <camel:setBody id="_setBodyQueryTrigger">
+            <camel:setBody id="_setBodyQueryObjects">
                 <camel:constant>
-                select owner schema, 'TRIGGER' type, table_name owner, TRIGGER_NAME object, 'TYPE [' || TRIGGER_TYPE || '] EVENT[' || TRIGGERING_EVENT || '] STATUS[' || STATUS || '] DESCRIPTION[' || DESCRIPTION || ']' AS complement,  TRIGGER_BODY as COMMENTS 
-                  from SYS.DBA_TRIGGERS
-                 where owner = 'ADMCAD'
-                 order by 1, 2, 3 ,4
+                    select owner as schema, object_type as type, ' ' as OWNER, object_name as object, 'status[' || status || ']' as complement, ' ' as "COMMENTS"
+                      from SYS.DBA_OBJECTS
+                     where owner = 'ADMCAD'
+                       and object_type in ('FUNCTION','JAVA CLASS','JAVA RESOURCE','JAVA SOURCE','MATERIALIZED VIEW','PACKAGE','PACKAGE BODY','PROCEDURE','SEQUENCE',
+                                           'TRIGGER','TYPE','TYPE BODY','VIEW')
+                     order by 1, 2, 3, 4, 5
                 </camel:constant>
             </camel:setBody>
-            <camel:setHeader id="_SetHeaderCSVTriggerFileName" headerName="file-prefix">
-                <camel:constant>trigger</camel:constant>
+            <camel:setHeader id="_SetHeaderCSVObjectFileName" headerName="file-prefix">
+                <camel:constant>objects</camel:constant>
             </camel:setHeader>
-            <camel:to id="_toQuery-2-CSV-Param-Trigger" uri="direct:query-2-csv-parametrizado"/>
+            <camel:to id="_toQuery-2-CSV-Param-Objects" uri="direct:query-2-csv-parametrizado"/>
             
             <camel:setBody id="_setBodyQuerySources">
                 <camel:constant>
                     select owner as schema, type, ' ' as OWNER, name as object, line as complement, text as "COMMENTS"
                       from SYS.DBA_SOURCE
                      where owner = 'ADMCAD'
-                       and type not in ('TRIGGER')
                      order by 1, 2, 3, 4, 5
                 </camel:constant>
             </camel:setBody>
@@ -306,7 +307,7 @@
             </camel:setHeader>
             <camel:to uri="direct:get-diffs-file"/>
             <camel:setHeader headerName="file-prefix">
-                <camel:simple>trigger</camel:simple>
+                <camel:simple>objects</camel:simple>
             </camel:setHeader>
             <camel:to uri="direct:get-diffs-file"/>
             <camel:setHeader headerName="file-prefix">
