@@ -21,7 +21,7 @@ public class RemoveEndingNewLineProcessor implements Processor {
 					if (map.get(key) instanceof String) {
 						String value = (String) map.get(key);
 						if (value != null) {
-							map.put(key, value.replace('\n', ' '));
+							map.put(key, value.replace('\n', ' ').replace('\r', ' '));
 						}
 					}
 				}
