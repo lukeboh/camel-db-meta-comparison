@@ -5,6 +5,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd     http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
     <bean id="fileUtils" class="br.jus.tse.corporativa.io.FileUtils" scope="singleton"/>
     <bean id="diffExtractorProcessor" class="br.jus.tse.corporativa.util.camel.DiffExtractorInfoProcessor" scope="singleton"/>
+    <bean id="removeEndingNewLineProcessor" class="br.jus.tse.corporativa.util.camel.RemoveEndingNewLineProcessor" scope="singleton"/>
     <bean class="oracle.jdbc.pool.OracleDataSource"
         destroy-method="close" id="producao.dataSource" primary="true">
         <property name="URL" value="${producao.URL}"/>
@@ -185,10 +186,10 @@
               order by 1, 2, 3 ,4
                 </camel:constant>
             </camel:setBody>
-            <camel:setHeader id="_SetHeaderCSVTriggerFileName" headerName="file-prefix">
-                <camel:constant>trigger</camel:constant>
+            <camel:setHeader id="_SetHeaderCSVIndexFileName" headerName="file-prefix">
+                <camel:constant>index</camel:constant>
             </camel:setHeader>
-            <camel:to id="_toQuery-2-CSV-Param-Trigger" uri="direct:query-2-csv-parametrizado"/>
+            <camel:to id="_toQuery-2-CSV-Param-Index" uri="direct:query-2-csv-parametrizado"/>
             
             <camel:setBody id="_setBodyQueryTrigger">
                 <camel:constant>
@@ -198,14 +199,14 @@
                  order by 1, 2, 3 ,4
                 </camel:constant>
             </camel:setBody>
-            <camel:setHeader id="_SetHeaderCSVIndexFileName" headerName="file-prefix">
+            <camel:setHeader id="_SetHeaderCSVTriggerFileName" headerName="file-prefix">
                 <camel:constant>trigger</camel:constant>
             </camel:setHeader>
-            <camel:to id="_toQuery-2-CSV-Param-Index" uri="direct:query-2-csv-parametrizado"/>
+            <camel:to id="_toQuery-2-CSV-Param-Trigger" uri="direct:query-2-csv-parametrizado"/>
             
             <camel:setBody id="_setBodyQuerySources">
                 <camel:constant>
-                    select owner as schema, type, ' ' as OWNER, name as object, line as complement, text as "COMMENT"
+                    select owner as schema, type, '***' as OWNER, name as object, line as complement, text as "COMMENTS"
                       from SYS.DBA_SOURCE
                      where owner = 'ADMCAD'
                        and type not in ('TRIGGER')
@@ -224,6 +225,7 @@
             <camel:recipientList id="_recipientListJdbc JDBC (URI DINAMICO)">
                 <camel:simple>jdbc:${in.header.working-branch}.dataSource</camel:simple>
             </camel:recipientList>
+            <camel:to uri="removeEndingNewLineProcessor"/>
             <camel:marshal id="_marshalRStoCSV">
                 <camel:csv>
                     <camel:header>SCHEMA</camel:header>
