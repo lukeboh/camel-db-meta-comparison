@@ -134,7 +134,7 @@
             <camel:log id="_log5" message="[$simple{in.header.working-branch}] Checkout da branch"/>
             <camel:recipientList id="_recipientListExec Git Checkout (URI DINAMICO)">
                 <!-- TODO Só na primeira vez que se roda em um repositorio sem as referidas branchs que tem que ter -b antes do nome da branch -->
-                <camel:simple>exec:git?args=checkout -b ${in.header.working-branch} &amp;workingDir=target/work/git-repo-temp</camel:simple>
+                <camel:simple>exec:git?args=checkout ${in.header.working-branch} &amp;workingDir=target/work/git-repo-temp</camel:simple>
             </camel:recipientList>
         </camel:route>
         <camel:route id="_query-2-csv">
@@ -206,7 +206,7 @@
             
             <camel:setBody id="_setBodyQuerySources">
                 <camel:constant>
-                    select owner as schema, type, '***' as OWNER, name as object, line as complement, text as "COMMENTS"
+                    select owner as schema, type, ' ' as OWNER, name as object, line as complement, text as "COMMENTS"
                       from SYS.DBA_SOURCE
                      where owner = 'ADMCAD'
                        and type not in ('TRIGGER')
