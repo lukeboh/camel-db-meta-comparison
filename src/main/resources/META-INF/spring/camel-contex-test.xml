@@ -3,8 +3,8 @@
     xmlns:camel="http://camel.apache.org/schema/spring"
     xmlns:context="http://www.springframework.org/schema/context"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd     http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
-    <bean class="oracle.jdbc.pool.OracleDataSource"
-        destroy-method="close" id="producao.dataSource" primary="true">
+    <bean class="oracle.jdbc.pool.OracleDataSource" destroy-method="close"
+        id="producao.dataSource" primary="true">
         <property name="URL" value="${producao.URL}"/>
         <property name="user" value="${producao.user}"/>
         <property name="password" value="${producao.password}"/>
@@ -17,9 +17,9 @@
             <camel:from id="_from1" uri="timer:timerMain?period=30m"/>
             <camel:setBody id="_setBodyQuerySources">
                 <camel:constant>
-                    select owner as schema, type, ' ' as OWNER, name as object, line as complement, text as "COMMENT"
+                    select owner as schema, type, ' ' as OWNER, name as object, line as complement, text as "COMMENTS"
                       from SYS.DBA_SOURCE
-                     where owner = 'ADMCAD'
+                     where owner = 'ADMCAD' and name = 'FC_GERAHASH_MD5'
                        and type not in ('TRIGGER')
                      order by 1, 2, 3, 4, 5
                 </camel:constant>
