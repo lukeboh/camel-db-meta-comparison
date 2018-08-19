@@ -148,13 +148,12 @@ tr.jb-row-title {
 .jb-container .jb-content {
     color: #FFF;
     font-size: 1.2em;
+    text-align: center;
 }
 
 .jb-content .jb-content-title {
     font-size: 1.3em;
     margin: auto;
-    width: 100%;
-    text-align: center;
 }
 
 a, a > table > tbody > tr > td {
