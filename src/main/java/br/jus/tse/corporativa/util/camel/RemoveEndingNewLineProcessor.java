@@ -12,7 +12,8 @@ import org.apache.camel.Processor;
 public class RemoveEndingNewLineProcessor implements Processor {
 	public void process(Exchange exchange) throws Exception {
 		Message in = exchange.getIn();
-		if (in.getBody() instanceof ArrayList && in.getHeader("file-prefix").equals("sources")) {
+		String filePrefix = (String) in.getHeader("file-prefix");
+		if (in.getBody() instanceof ArrayList && (filePrefix.equals("sources") || filePrefix.equals("table") || filePrefix.equals("column"))) {
 			ArrayList body = (ArrayList) in.getBody();
 			for (int i = 0; i < body.size(); i++) {
 				LinkedHashMap map = (LinkedHashMap) body.get(i);
