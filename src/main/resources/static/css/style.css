@@ -180,12 +180,12 @@ a > table > tbody > tr > td:hover {
 }
 
 .a-menos {
-    color: limegreen;
+    color: orangered;
     min-width: 80px;
 }
 
 .a-mais {
-    color: orangered;
+    color: limegreen;
 }
 
 .jb-container a.button {
@@ -199,4 +199,33 @@ a > table > tbody > tr > td:hover {
 
 .jb-container a.button:hover {
     background-color: #f0f0f0;
+}
+
+/* Tooltip container */
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 400px;
+    background-color: rgba(0, 0, 0, 0.9);
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    font-size: 20px;
+    top: 100%;
+    left: -110%;
+    margin-left: -60px;
+    
+
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
 }
